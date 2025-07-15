@@ -171,4 +171,53 @@ inline unsigned long rotate_left_optimized(unsigned long n, int i) {
 
 利用CPU向量指令 并行处理多个操作 减少指令数量
 
+**在原有SM4代码基础上，为实现SM4-GCM模式，具体做了哪些更改和扩展**。
 
+---
+
+### 1. 新增的数据结构
+
+- **block128结构体** 
+  新增了一个`block128`结构体，用于表示128位（16字节）数据块。GCM模式所有数据都按16字节一块来处理。
+
+---
+
+### 2. 新增的辅助函数
+
+- **ulong_to_block128 / block128_to_ulong** 
+  用于在SM4内部的4个unsigned long数组和GCM用的16字节数组之间转换。
+
+- **block128_xor** 
+  实现两个128位数据块的异或操作。
+
+- **galois_mult** 
+  实现Galois域上的乘法（GF(2^128)），这是GCM认证的核心数学操作。
+
+- **ghash** 
+  实现GCM模式的认证函数，用于生成认证标签（Tag）。
+
+- **inc32** 
+  实现计数器自增，每加密一块数据，计数器加1。
+
+- **sm4_ecb_encrypt** 
+  用SM4算法加密一个128位数据块，作为GCM模式的密钥流生成器。
+
+---
+
+### 3. 新增的主流程函数
+
+- **sm4_gcm_encrypt** 
+  实现SM4-GCM加密和认证，输入明文、密钥、IV、AAD，输出密文和认证标签Tag。
+
+- **sm4_gcm_decrypt** 
+  实现SM4-GCM解密和认证校验，输入密文、密钥、IV、AAD、Tag，输出明文，并判断Tag是否正确。
+
+---
+
+### 4. 新增的main函数示例
+
+- 新增了一个main函数，演示如何调用SM4-GCM加密、解密和认证的完整流程。
+
+---
+
+#
